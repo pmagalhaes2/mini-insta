@@ -6,7 +6,7 @@ const {
   updateProfile,
 } = require("../controllers/userController");
 const validateUser = require("../middlewares/authentication");
-const { createPost, likePost } = require("../controllers/postController");
+const { createPost, likePost, commentPost } = require("../controllers/postController");
 const router = express();
 
 router.post("/usuarios", createUser);
@@ -22,5 +22,7 @@ router.put("/usuarios/perfil", updateProfile);
 router.post("/postagens", createPost);
 
 router.post("/postagens/:postagemId/curtir", likePost);
+
+router.post("/postagens/:postagemId/comentar", commentPost);
 
 module.exports = router;
