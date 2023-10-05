@@ -6,7 +6,12 @@ const {
   updateProfile,
 } = require("../controllers/userController");
 const validateUser = require("../middlewares/authentication");
-const { createPost, likePost, commentPost } = require("../controllers/postController");
+const {
+  createPost,
+  likePost,
+  commentPost,
+  getPosts,
+} = require("../controllers/postController");
 const router = express();
 
 router.post("/usuarios", createUser);
@@ -18,6 +23,8 @@ router.use(validateUser);
 router.get("/usuarios/perfil", getProfile);
 
 router.put("/usuarios/perfil", updateProfile);
+
+router.get("/postagens", getPosts);
 
 router.post("/postagens", createPost);
 

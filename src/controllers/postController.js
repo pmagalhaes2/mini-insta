@@ -121,4 +121,65 @@ const commentPost = async (req, res) => {
   }
 };
 
-module.exports = { createPost, likePost, commentPost };
+const getPosts = async (req, res) => {
+  const { id } = req.usuario;
+  const { offset } = req.query;
+
+  const offsetValue = offset ? offset : 0;
+
+  try {
+    const posts = await knex("postagens")
+      .where("usuario_id", "<>", id)
+      .limit(10)
+      .offset(offsetValue);
+
+    if (posts.length === 0) {
+      return res.status(200).json(posts);
+    }
+
+    for (let post of posts) {
+      const user = await knex("usuarios")
+        .where({ id: post.usuario_id })
+        .select("imagem", "username", "verificado")
+        .first();
+
+      post.usuario = user;
+
+      const photos = await knex("postagem_fotos")
+        .where({
+          postagem_id: post.id,
+        })
+        .select("imagem");
+
+      post.fotos = photos;
+
+      const likes = await knex("postagem_curtidas")
+        .where({
+          postagem_id: post.id,
+        })
+        .select("usuario_id");
+
+      post.curtidas = likes.length;
+
+      post.curtidoPorMim = likes.find((like) => like.usuario_id === id)
+        ? true
+        : false;
+
+      const comments = await knex("postagem_comentarios")
+        .leftJoin("usuarios", "usuarios.id", "postagem_comentarios.usuario_id")
+        .where({
+          postagem_id: post.id,
+        })
+        .select("usuarios.username", "postagem_comentarios.texto");
+
+      post.comentarios = comments;
+    }
+
+    return res.status(200).json(posts);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Erro interno no servidor!" });
+  }
+};
+
+module.exports = { createPost, likePost, commentPost, getPosts };
